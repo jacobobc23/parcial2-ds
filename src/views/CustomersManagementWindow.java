@@ -347,6 +347,7 @@ public class CustomersManagementWindow extends javax.swing.JFrame {
                 try {
                     controller.deleteCustomer(id);
                     fillTable();
+                    cleanFields();
                     JOptionPane.showMessageDialog(null, "Cleinte eliminado correctamente");
                 } catch (OrderCustomerException ex) {
                     JOptionPane.showMessageDialog(null, ex.getMessage());
