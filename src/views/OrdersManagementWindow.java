@@ -1,6 +1,6 @@
 package views;
 
-import controllers.OrderManagementController;
+import controllers.OrdersController;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.swing.DefaultComboBoxModel;
@@ -11,11 +11,11 @@ import model.Order;
 
 /**
  *
- * @author Jacobo-bc
+ * @author jacobobc
  */
 public class OrdersManagementWindow extends javax.swing.JFrame {
 
-    private final OrderManagementController controller;
+    private final OrdersController controller;
 
     /**
      * Creates new form OrdersManagementWindow
@@ -24,10 +24,10 @@ public class OrdersManagementWindow extends javax.swing.JFrame {
         initComponents();
         setLocationRelativeTo(null);
         setTitle("Clientes");
-        controller = new OrderManagementController();
-        fillTable();
+        controller = new OrdersController();
+        fillOrdersTable();
         setCbxCustomers();
-        setCbxSearchCustomer();
+        setCbxCustomersFilter();
         hideWarning();
     }
 
@@ -325,7 +325,7 @@ public class OrdersManagementWindow extends javax.swing.JFrame {
 
         Customer selectedCustomer = null;
 
-        for (Customer customers : controller.listCustomers()) {
+        for (Customer customers : controller.listAllCustomers()) {
             if (customers.getName().equals(customer)) {
                 selectedCustomer = customers;
                 break;
@@ -336,7 +336,7 @@ public class OrdersManagementWindow extends javax.swing.JFrame {
             Order order = new Order(selectedCustomer, total);
             controller.insertOrder(order);
             JOptionPane.showMessageDialog(null, "Orden registrada correctamente");
-            fillTable();
+            fillOrdersTable();
             cleanFields();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error al registrar la orden");
@@ -355,7 +355,7 @@ public class OrdersManagementWindow extends javax.swing.JFrame {
 
         Customer selectedCustomer = null;
 
-        for (Customer customers : controller.listCustomers()) {
+        for (Customer customers : controller.listAllCustomers()) {
             if (customers.getName().equals(customer)) {
                 selectedCustomer = customers;
                 break;
@@ -366,7 +366,7 @@ public class OrdersManagementWindow extends javax.swing.JFrame {
             Order order = new Order(selectedCustomer, total);
             controller.updateOrder(order);
             JOptionPane.showMessageDialog(null, "Orden editada correctamente");
-            fillTable();
+            fillOrdersTable();
             cleanFields();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error al editar la orden");
@@ -376,9 +376,8 @@ public class OrdersManagementWindow extends javax.swing.JFrame {
 
     private void btnDeleteOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteOrderActionPerformed
         int selected = ordersTable.getSelectedRow();
-
+        
         if (selected >= 0) {
-
             int id = (int) ordersTable.getModel().getValueAt(selected, 0);
 
             int answer = JOptionPane.showConfirmDialog(null, "¿Está seguro de eliminar la orden?",
@@ -386,7 +385,7 @@ public class OrdersManagementWindow extends javax.swing.JFrame {
 
             if (answer == 0) {
                 controller.deleteOrder(id);
-                fillTable();
+                fillOrdersTable();
                 JOptionPane.showMessageDialog(null, "Cleinte eliminado correctamente");
             }
         } else {
@@ -420,12 +419,12 @@ public class OrdersManagementWindow extends javax.swing.JFrame {
 
         } else {
             JOptionPane.showMessageDialog(null, "Orden no encontrada");
-            fillTable();
+            fillOrdersTable();
         }
     }//GEN-LAST:event_btnSelectCustomerActionPerformed
 
     private void btnViewAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewAllActionPerformed
-        fillTable();
+        fillOrdersTable();
         cleanFields();
     }//GEN-LAST:event_btnViewAllActionPerformed
 
@@ -435,10 +434,10 @@ public class OrdersManagementWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCleanActionPerformed
 
     private void ordersTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ordersTableMouseClicked
-        int seleccion = ordersTable.getSelectedRow();
+        int selected = ordersTable.getSelectedRow();
 
-        txtTotal.setText(ordersTable.getValueAt(seleccion, 2).toString());
-        cbxCustomers.setSelectedItem((ordersTable.getValueAt(seleccion, 3)).toString());
+        txtTotal.setText(ordersTable.getValueAt(selected, 2).toString());
+        cbxCustomers.setSelectedItem((ordersTable.getValueAt(selected, 3)).toString());
     }//GEN-LAST:event_ordersTableMouseClicked
 
     private void cbxFilterItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxFilterItemStateChanged
@@ -446,7 +445,7 @@ public class OrdersManagementWindow extends javax.swing.JFrame {
 
             String name = cbxFilter.getSelectedItem().toString().trim();
             String selectedID = "";
-            for (Customer customers : controller.listCustomers()) {
+            for (Customer customers : controller.listAllCustomers()) {
                 if (customers.getName().equals(name)) {
                     selectedID = customers.getId();
                     break;
@@ -479,7 +478,7 @@ public class OrdersManagementWindow extends javax.swing.JFrame {
             }
 
         } else {
-            fillTable();
+            fillOrdersTable();
             hideWarning();
         }
     }//GEN-LAST:event_cbxFilterItemStateChanged
@@ -489,7 +488,7 @@ public class OrdersManagementWindow extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_btnHomeActionPerformed
 
-    private void fillTable() {
+    private void fillOrdersTable() {
         DefaultTableModel model = new DefaultTableModel();
 
         ArrayList<Order> orders = controller.listAllOrders();
@@ -529,23 +528,23 @@ public class OrdersManagementWindow extends javax.swing.JFrame {
         DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
         cbxCustomers.setModel(model);
 
-        ArrayList<Customer> customers = controller.listCustomers();
-        model.addElement("Seleccione un Cliente"); // Agrega la opción predeterminada
+        ArrayList<Customer> customers = controller.listAllCustomers();
+        model.addElement("Seleccione un Cliente"); 
 
         for (Customer customer : customers) {
-            model.addElement(customer.getName()); // Agrega los nombres de los clientes al ComboBoxModel
+            model.addElement(customer.getName()); 
         }
     }
 
-    private void setCbxSearchCustomer() {
+    private void setCbxCustomersFilter() {
         DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
         cbxFilter.setModel(model);
 
-        ArrayList<Customer> customers = controller.listCustomers();
-        model.addElement("Seleccione un cliente"); // Agrega la opción predeterminada
+        ArrayList<Customer> customers = controller.listAllCustomers();
+        model.addElement("Seleccione un cliente"); 
 
         for (Customer customer : customers) {
-            model.addElement(customer.getName()); // Agrega los nombres de los clientes  al ComboBoxModel
+            model.addElement(customer.getName()); 
         }
     }
 

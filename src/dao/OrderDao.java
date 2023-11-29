@@ -8,51 +8,32 @@ import java.util.ArrayList;
 import model.Customer;
 import model.Order;
 import org.mariadb.jdbc.Connection;
-import singleton.Singleton;
+import db.DBConnection;
 
 /**
  *
- * @author Jacobo-bc
+ * @author jacobobc
  */
 public class OrderDao {
 
     private final Connection con;
+    private final CustomerDao customerDao;
 
     public OrderDao() {
-        con = Singleton.getINSTANCE().getConnection();
+        con = DBConnection.getINSTANCE().getConnection();
+        customerDao = new CustomerDao();
     }
 
-    public ArrayList<Customer> listCustomers() {
-        ArrayList<Customer> customers = new ArrayList<>();
-        String query = "SELECT * FROM customers";
-
-        try ( PreparedStatement ps = con.prepareStatement(query)) {
-            ResultSet rs;
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                String id = rs.getString("id");
-                String name = rs.getString("name");
-                String email = rs.getString("email");
-
-                Customer Customer = new Customer(id, name, email);
-                customers.add(Customer);
-            }
-        } catch (SQLException ex) {
-            System.err.println(ex.toString());
-        }
-        return customers;
+    public ArrayList<Customer> listAllCustomers() {
+        return customerDao.listAllCustomers();
     }
 
     public ArrayList<Order> listAllOrders() {
         ArrayList<Order> orders = new ArrayList<>();
-        String query = "SELECT * FROM orders";
+        String sql = "SELECT * FROM orders";
 
-        try ( PreparedStatement ps = con.prepareStatement(query)) {
-
-            ResultSet rs;
-
-            rs = ps.executeQuery();
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
                 int id = rs.getInt("id");
@@ -72,21 +53,21 @@ public class OrderDao {
         return orders;
     }
 
-    public ArrayList<Order> listCustomerOrders(String id) {
+    public ArrayList<Order> listCustomerOrders(String customerId) {
         ArrayList<Order> orders = new ArrayList<>();
-        String query = "SELECT * FROM orders WHERE customer_id = ?";
+        String sql = "SELECT * FROM orders WHERE customer_id = ?";
 
-        try ( PreparedStatement ps = con.prepareStatement(query)) {
-            ps.setString(1, id);
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, customerId);
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
                 int orderId = rs.getInt("id");
                 LocalDate date = rs.getDate("date").toLocalDate();
                 double total = rs.getDouble("total");
-                
-                Customer customer = getCustomer(id);
-                
+
+                Customer customer = getCustomer(customerId);
+
                 Order order = new Order(date, customer, orderId, total);
                 orders.add(order);
             }
@@ -98,11 +79,10 @@ public class OrderDao {
 
     public Order selectOrder(int id) {
         String query = "SELECT * FROM orders WHERE id = ?";
-        try ( PreparedStatement ps = con.prepareStatement(query)) {
-            ResultSet rs;
 
+        try (PreparedStatement ps = con.prepareStatement(query)) {
             ps.setInt(1, id);
-            rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
                 LocalDate date = rs.getDate("date").toLocalDate();
@@ -120,9 +100,9 @@ public class OrderDao {
     }
 
     public void insertOrder(Order order) throws SQLException {
-        String query = "INSERT INTO orders (date, total, customer_id) VALUES (?, ?, ?)";
-        try ( PreparedStatement ps = con.prepareStatement(query)) {
+        String sql = "INSERT INTO orders (date, total, customer_id) VALUES (?, ?, ?)";
 
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setDate(1, java.sql.Date.valueOf(order.getDate()));
             ps.setDouble(2, order.getTotal());
             ps.setString(3, order.getCustomer().getId());
@@ -134,8 +114,9 @@ public class OrderDao {
     }
 
     public void updateOrder(Order order) throws SQLException {
-        String query = "UPDATE orders SET total = ?, customer_id = ?";
-        try ( PreparedStatement ps = con.prepareStatement(query)) {
+        String sql = "UPDATE orders SET total = ?, customer_id = ?";
+       
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setDouble(1, order.getTotal());
             ps.setString(2, order.getCustomer().getId());
             ps.executeUpdate();
@@ -145,8 +126,9 @@ public class OrderDao {
     }
 
     public void deleteOrder(int id) {
-        String query = "DELETE FROM orders WHERE id = ?";
-        try ( PreparedStatement ps = con.prepareStatement(query)) {
+        String sql = "DELETE FROM orders WHERE id = ?";
+        
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException ex) {
@@ -155,7 +137,6 @@ public class OrderDao {
     }
 
     private Customer getCustomer(String id) {
-        CustomerDao customerDao = new CustomerDao();
         return customerDao.selectCustomer(id);
     }
 

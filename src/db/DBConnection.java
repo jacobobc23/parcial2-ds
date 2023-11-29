@@ -1,4 +1,4 @@
-package singleton;
+package db;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -8,31 +8,31 @@ import org.mariadb.jdbc.Connection;
 
 /**
  *
- * @author Jacobo-bc
+ * @author jacobobc
  */
-public class Singleton {
+public class DBConnection {
 
-    private static Singleton INSTANCE;
-    private Connection connection;
-
-    private static final String URL = "jdbc:mariadb://localhost:3306/bd_parcial2";
+    private static final String URL = "jdbc:mariadb://localhost:3306/ds_parcial2";
     private static final String USER = "root";
     private static final String PASSWORD = "";
 
-    private Singleton() {
+    private static DBConnection INSTANCE;
+    private Connection connection;
+
+    private DBConnection() {
         try {
             Class.forName("org.mariadb.jdbc.Driver");
             connection = (Connection) DriverManager.getConnection(URL, USER, PASSWORD);
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            System.err.println(ex.toString());
         } catch (ClassNotFoundException e) {
-            Logger.getLogger(Singleton.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 
-    public static Singleton getINSTANCE() {
+    public static DBConnection getINSTANCE() {
         if (INSTANCE == null) {
-            INSTANCE = new Singleton();
+            INSTANCE = new DBConnection();
         }
         return INSTANCE;
     }
@@ -46,9 +46,8 @@ public class Singleton {
             try {
                 connection.close();
             } catch (SQLException ex) {
-                ex.printStackTrace();
+                System.err.println(ex.toString());
             }
-
         }
     }
 }

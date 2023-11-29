@@ -7,18 +7,18 @@ import model.Customer;
 
 /**
  *
- * @author Jacobo-bc
+ * @author jacobobc
  */
-public class CustomerManagementController {
+public class CustomersController {
     
     private final CustomerDao customerDao;
     
-    public CustomerManagementController() {
+    public CustomersController() {
         customerDao = new CustomerDao();
     }
     
-    public ArrayList<Customer> listCustomers() {
-        return customerDao.listCustomers();
+    public ArrayList<Customer> listAllCustomers() {
+        return customerDao.listAllCustomers();
     }
     
     public Customer selectCustomer(String id) {

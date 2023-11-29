@@ -8,18 +8,18 @@ import model.Order;
 
 /**
  *
- * @author Jacobo-bc
+ * @author jacobobc
  */
-public class OrderManagementController {
+public class OrdersController {
 
     private final OrderDao orderDao;
 
-    public OrderManagementController() {
+    public OrdersController() {
         orderDao = new OrderDao();
     }
 
-    public ArrayList<Customer> listCustomers() {
-        return orderDao.listCustomers();
+    public ArrayList<Customer> listAllCustomers() {
+        return orderDao.listAllCustomers();
     }
 
     public ArrayList<Order> listAllOrders() {

@@ -1,6 +1,6 @@
 package views;
 
-import controllers.CustomerManagementController;
+import controllers.CustomersController;
 import exceptions.OrderCustomerException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -10,11 +10,11 @@ import model.Customer;
 
 /**
  *
- * @author Jacobo-bc
+ * @author jacobobc
  */
 public class CustomersManagementWindow extends javax.swing.JFrame {
 
-    private final CustomerManagementController controller;
+    private final CustomersController controller;
 
     /**
      * Creates new form CustomersManagementWindow
@@ -23,8 +23,8 @@ public class CustomersManagementWindow extends javax.swing.JFrame {
         initComponents();
         setLocationRelativeTo(null);
         setTitle("Clientes");
-        controller = new CustomerManagementController();
-        fillTable();
+        controller = new CustomersController();
+        fillCustomersTable();
     }
 
     /**
@@ -304,7 +304,7 @@ public class CustomersManagementWindow extends javax.swing.JFrame {
             Customer customer = new Customer(id, name, email);
             controller.insertCustomer(customer);
             JOptionPane.showMessageDialog(null, "Cliente registrado correctamente");
-            fillTable();
+            fillCustomersTable();
             cleanFields();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error al registrar el cliente");
@@ -325,7 +325,7 @@ public class CustomersManagementWindow extends javax.swing.JFrame {
             Customer customer = new Customer(id, name, email);
             controller.updateCustomer(customer);
             JOptionPane.showMessageDialog(null, "Cliente editado correctamente");
-            fillTable();
+            fillCustomersTable();
             cleanFields();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error al editar el cliente");
@@ -333,11 +333,9 @@ public class CustomersManagementWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_btnUpdateCustomerActionPerformed
 
     private void btnDeleteCustomerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteCustomerActionPerformed
-
         int selected = customersTable.getSelectedRow();
 
         if (selected >= 0) {
-
             String id = customersTable.getModel().getValueAt(selected, 0).toString();
 
             int answer = JOptionPane.showConfirmDialog(null, "¿Está seguro de eliminar el cliente?",
@@ -346,7 +344,7 @@ public class CustomersManagementWindow extends javax.swing.JFrame {
             if (answer == 0) {
                 try {
                     controller.deleteCustomer(id);
-                    fillTable();
+                    fillCustomersTable();
                     cleanFields();
                     JOptionPane.showMessageDialog(null, "Cleinte eliminado correctamente");
                 } catch (OrderCustomerException ex) {
@@ -383,12 +381,12 @@ public class CustomersManagementWindow extends javax.swing.JFrame {
 
         } else {
             JOptionPane.showMessageDialog(null, "Cliente no encontrado");
-            fillTable();
+            fillCustomersTable();
         }
     }//GEN-LAST:event_btnSelectCustomerActionPerformed
 
     private void btnViewAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewAllActionPerformed
-        fillTable();
+        fillCustomersTable();
         cleanFields();
     }//GEN-LAST:event_btnViewAllActionPerformed
 
@@ -410,10 +408,10 @@ public class CustomersManagementWindow extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_btnHomeActionPerformed
 
-    private void fillTable() {
+    private void fillCustomersTable() {
         DefaultTableModel model = new DefaultTableModel();
 
-        ArrayList<Customer> customers = controller.listCustomers();
+        ArrayList<Customer> customers = controller.listAllCustomers();
         model.setColumnIdentifiers(new Object[]{
             "ID", "Nombre", "Email"
         });
@@ -444,10 +442,6 @@ public class CustomersManagementWindow extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) customersTable.getModel();
         model.setRowCount(0);
     }
-    /**
-     * @param args the command line arguments
-     */
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel backgroundPanel;
